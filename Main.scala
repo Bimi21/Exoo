@@ -1,218 +1,133 @@
-
+import scala.io.StdIn.readInt
+import scala.io.StdIn.readLine
+import java.lang.Math
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 object Main {
-  var placeASéance1 = 50
-  var placeASéance2 = 50
-  var placeASéance3 = 50
-
-  var placeBSéance1 = 50
-  var placeBSéance2 = 50
-  var placeBSéance3 = 50
-
-  var filmSalle1 = "Le mystère de la forêt"
-  var filmSalle2 = "Voyage Interstellaire"
-
   def main(args: Array[String]): Unit = {
-    import scala.io.StdIn._
+    val nbSalles = new Array[String](4)
+    val acunFilm: String ="Acun film programmé"
 
-    var Séance1 = "14h00"
-    var Séance2 = "17h00"
-    var Séeance3 = "20h00"
+    val prixAulte = 12.0
+    val prixEtudiant = 8.0
+    val prixEnfant = 6.0
 
+    val discount = Array(-2.00,0,1)
+    val horaireSeance = Array("14h00", "17h00", "20h00")
+    val films = Array(acunFilm)
 
-    var prixAdulte = 12.00
-    var prixEtudiant = 8.00
-    var prixEnfant = 6.00
+    var places14h = Array(50,50,50)
+    var places17h = Array(50,50,50)
+    var places20h = Array(50,50,50)
 
-    println("Choisir le mode : Client = A / Admin = B / Quitter = C  ")
-    var Client = readC()
+    val pins = Array(2025,2025,2025)
 
-    if (Client == 'A') {
-      println("Vous êtes en mode Client")
-      println("Choisir un des deux films : + \n1) FilmA (Salle 1) \n2) FilmB (Salle 2)")
-      var choixFilm = readInt()
-
-      var FilmChoisi = ""
-      if (choixFilm == 1) {
-        FilmChoisi = filmSalle1
-      } else if (choixFilm == 2) {
-        FilmChoisi = filmSalle2
+    def validerPin(idSalle: Int, pins:Array[Int]):Boolean = {
+      print("Entrez le code PIN : \n>")
+      val saisi = readInt()
+      if (saisi == pins(idSalle)){
+        return  true
       }
-      println("Choisir la Séance : \n1) 14h00 (Rabais -2.00 CHF \n2) 17h00 (Prix normal) \n3) 20h00 (Prix normal: + 1CHF)")
+        return false
+    }
+    def mettreAJourPin(idSalle: Int, pins: Array[String]):Unit={
+      var ok = false
+      while(!ok) {
+        println("Modification du PIN pour les salles")
+        print("Entrez un nouveau PIN à 4 chiffre: \n>")
+        val nouveaupin = readLine()
+        if (nouveaupin.toInt >= 1000 && nouveaupin.toInt <= 9999){
+          pins(idSalle) = nouveaupin
+          println("PIN mis à jour avec succès.")
+          ok = true
+        }else {
+          println("PIN invalide. Le PIN doit contenir exactement 4 chiffre.")
+        }
+      }
+    }
+    def reserveClient (idSalle: Int, films: Array[String], places14h: Array[Int], places17h00: Array[Int], places20h: Array[Int]): Boolean ={
+      if (films(idSalle) == acunFilm) {
+        println("Erreur : cette salle n'a pas de film programmé.")
+        return false
+      }
+      println("Mode Client")
+      println("Salle: " +films(idSalle))
+      println("\n Veuillez sélectionner votre séance : ")
+      println("1) (Tarif réduit : -2.00 CHF")
+      println("2) (Tarif normal)")
+      println("3) (Tarif soirée : +1.00 CHF)")
       print(">")
-      var Seance = readInt()
+      val choixSeance = readInt()-1
 
+      val salles = Array(places14h, places17h, places20h)
       println("Combien de billet souhaitez-vous ? (1-5)")
-      var nbBillets = readInt()
-      // validation : entre 1 et 5
-      if (nbBillets <= 0 || nbBillets < 1) {
-        println("Erreur : vous devez choisir entre 1 et 5 billets.")
-        nbBillets = readInt()
-      } else if (nbBillets > 5) {
-        println ("Erreur vous devez choisir entre 1 et 5 billets.")
-        nbBillets = readInt()
+      val nbBillet = readInt()
+
+      if (nbBillet < 1 || nbBillet > 5) {
+        println("Erreur: le nombre de billets doit etre entre 1 et 5")
+        return false
       }
-
-      var placeRestantes = 0
-      if (choixFilm == 1) {
-        if (Seance == 1) placeRestantes = placeASéance1
-        else if (Seance == 2) placeRestantes = placeASéance2
-        else if (Seance == 3) placeRestantes = placeBSéance3
-      } else if (choixFilm == 2) {
-        if (Seance == 1) placeRestantes = placeBSéance1
-        else if (Seance == 2) placeRestantes = placeBSéance2
-        else if (Seance == 3) placeRestantes = placeBSéance3
+      var total = 0.0
+      var i = 1
+      while (i <= nbBillet) {
+        println("Billet" + i)
+        println("1) Adulte")
+        println("2) Etudiant")
+        println("3) Enfant")
+        print(">")
+        val typeBillet = readInt()
+        var prix = 0.0
+        if(typeBillet == 1) prix = prixAulte
+        else if (typeBillet == 2) prix = prixEtudiant
+        else if (typeBillet == 3) prix = prixEnfant
+        else return false
+        total = total + prix + discount(choixSeance)
+        i += 1
       }
+      println("\n Récapitulatif de votre comande :")
+      print("Salle :" +  idSalle + 1)
+      print("Film:" + films(idSalle))
+      print("\nSéance:" + choixSeance)
+      print("\nNombre de billet: " + nbBillet)
+      println("\nPrix total :" + total)
 
+      val codeTransaction = 1000 + Math.floor(Math.random() * 9000).toInt
+      println("Traitement en cours...")
+      println("Paiement confirmé !")
+      println("Vos billets ont été réservés avec succès.")
+      println("Bon film !")
 
-      if (nbBillets > placeRestantes) {
-        println("Erreur : seulment " + placeRestantes + " places disponibles pour cette séance")
-      } else {
-        var prixTotal: Double = 0.0
-        var i = 1
-        while (i <= nbBillets) {
-          println("Type du billet" + i + "\n1) Adulte ("+ prixAdulte + "CHF)" + "\n2) Etudiant ("+ prixEtudiant + "CHF)" + "\n3) Enfant (" + prixEnfant + "CHF")
-          print(">")
-          var typeBillet = readInt()
-
-          var prixUnBillet: Double = 0.0
-          if (typeBillet == 1) {
-            prixUnBillet = prixAdulte
-          } else if (typeBillet == 2) {
-            prixUnBillet = prixEtudiant
-          } else if (typeBillet == 3) {
-            prixUnBillet = prixEnfant
-          }
-
-        if (Seance == 1) {
-          prixUnBillet = prixUnBillet - 2
-        } else if (Seance == 3) {
-          prixUnBillet = prixUnBillet + 1
-        }
-
-        prixTotal = prixTotal + prixUnBillet
-        i = i + 1
-        }
-
-        println("\nRécapitulatif de votre comande")
-
-      if (choixFilm == 1) {
-        println("Film : " + filmSalle1)
-        } else {
-        println("Film : " + filmSalle2)
-      }
-
-        if (Seance == 1) {
-          println(" Séance : 14h00")
-        } else if (Seance == 2) {
-          println("Séance : 17h00")
-        } else {
-          println("Séance == 3")
-        }
-
-        println(" Nombre de billets : " + nbBillets)
-        println("Prix totale : " + prixTotal + " CHF")
-          println(" -- \n")
-
-        var nouvellesPlaces = 0
-        if (choixFilm == 1 && Seance == 1) {
-          nouvellesPlaces = placeASéance1 - nbBillets
-        }
-        else if (choixFilm == 1 && Seance ==2) {
-          nouvellesPlaces = placeASéance2 - nbBillets
-        }
-        else if (choixFilm == 1 && Seance == 3) {
-          nouvellesPlaces = placeASéance3 - nbBillets
-        }
-        else if (choixFilm == 2 && Seance == 1) {
-          nouvellesPlaces = placeBSéance1 - nbBillets
-        }
-        else if (choixFilm == 2 && Seance == 2) {
-          nouvellesPlaces = placeBSéance2 - nbBillets
-        } else if (choixFilm == 2 && Seance == 3) {
-          nouvellesPlaces = placeBSéance3 - nbBillets
-        }
-
-        if (choixFilm == 1 && Seance == 1) {
-          placeASéance1 = nouvellesPlaces
-        } else if (choixFilm == 1 && Seance == 2) {
-          placeASéance2 = nouvellesPlaces
-        } else if (choixFilm == 1 && Seance == 3) {
-          placeASéance2 = nouvellesPlaces
-        }  else if (choixFilm == 2 && Seance == 1) {
-          placeBSéance1 = nouvellesPlaces
-        } else if (choixFilm == 2 && Seance == 2) {
-          placeBSéance2 = nouvellesPlaces
-        } else if (choixFilm == 2 && Seance == 3) {
-          placeBSéance3 = nouvellesPlaces
-        }
-
-        println("Paiement par carte bencaire")
-        print("\n Code de transaction : " + Math.round(Math.random() * 1000))
-        print("\n(Traitemnet en cours...)")
-
-        print("\n\nPaiement confirmé !")
-        print("\n Vos billets ont été réservés avec succès")
-        print("\nBon film !\n")
+    salles(choixSeance)(idSalle)=salles(choixSeance)(idSalle) - nbBillet
+      return true
     }
-      println("Retour au menu principal ...")
-      main(Array(""))
-  }
-    if(Client == 'B') {
-      println("Vous êtes en mode Admin")
-
-      println("Entrez le PIN: ")
-      print(">")
-      val PIN = 2025
-      var pin = readInt()
-
-      while (pin != PIN) {
-        print("Erreur")
-        pin = readInt()
-      }
-      print("Acès autorisé. \nChoix:\n1)Etat des salles\n2) Changement de salle\n>")
-      var choixADD = readInt()
-
-      if (choixADD == 1) {
-        println("État des salles :\n")
-
-        println("Salle 1 - " + filmSalle1 + "\n Séance 14h00 : " + placeASéance1 + "/50 places disponibles" + "\n Séance 17h00 : " + placeASéance2 + "/50 places disponibles" + "\n Séance 20h00 : " + placeASéance3 + "/50 places disponibles")
-
+    def afficherEtatSalles(films: Array[String], places14h: Array[Int], places17h: Array[Int], places20h: Array[Int]): Unit ={
+      println("\n Etat des salles: \n")
+      var i = 0
+      while (i < films.length) {
+        println("Salle (i + 1) - (film(i)")
+        println("Seance 14h00 : places14h/50 places disponible")
+        println("Seance 17h00 : places14h/50 places disponible")
+        println("Seance 20h00 : places14h/50 places disponible")
         println()
-
-        println("Salle 2 - " + filmSalle2 + "\nSéance 14h00 : " + placeBSéance1 + "/50 places disponibles" + "\n Séance 17h00 : " + placeBSéance2 + "/50 places disponibles" + "\n Séance 20h00 : " + placeBSéance3 + "/50 places disponibles")
-
-      } else if (choixADD == 2) {
-        println("Quelle salle voulez-vous modifier ? \n1) Salle 1 \n2) Salle 2")
-        val salleChoisie = readInt()
-
-        var choisis = 0
-        val aucuneVenteSalle1 =
-          placeASéance1 == 50 && placeASéance2 == 50 && placeASéance3 == 50
-        val aucuneVenteSalle2 =
-          placeBSéance1 == 50 && placeBSéance2 == 50 && placeBSéance3 == 50
-
-        if (salleChoisie == 1 && aucuneVenteSalle1) {
-          print("Le film en salle 1 est : " + filmSalle1 + ".\n Quel film choisissez-vous en salle  1 ?")
-          var choisis = readLine()
-          filmSalle1 = choisis
-          print("Salle 1 - " + filmSalle1 + "\nRetour au menu principal")
-          main(Array(""))
-          //sys.exit(0)
-        } else if (salleChoisie == 2 && aucuneVenteSalle2) {
-          println("Le film en salle 2 est : " + filmSalle2 + ".\n Quel film choisissez-vous en salle 2 ?")
-          var choisis = readLine()
-          filmSalle2 = choisis
-          print("Salle 2 - " + filmSalle2 + " \nRetour au menu principale")
-          main(Array(""))
-          //sys.exit(0)
-        } else {
-          println("Ce filme ne peut pas être modifié, car la séance a déjà des réservations.")
-          print("Retour au menu principal...")
-          main(Array(""))
-      }
-      main(Array(""))
+        i += 1
       }
     }
+    def changerFilmSalle(idSalle: Int, films: Array[String], places14h00: Array[Int], places17h00: Array[Int], places20h00 Array[Int]): Unit ={
+      val aucuneVente = places14h(idSalle) == 50 && places17h(idSalle) == 50 && places20h(idSalle) == 50
+
+      if (!aucuneVente) {
+        println("Ce film ne peut pas être modifié, car la salle a déjà des réservation.")
+        return
+      }
+      println("Film actuel (salle (idSalle + 1): films(idSalle)")
+      print("Entrez le nouveau titre du film : \n>")
+      val nouveau = readLine()
+      films(idSalle) = nouveau
+      println("Film mis à jour.")
+
+
+
     }
+  }
 }
+
+
